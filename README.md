@@ -45,8 +45,16 @@ Reservas não retiradas em **15 min** após o horário inicial expiram automatic
 
 Botão **A / A+ / A++** no cabeçalho aumenta a fonte global (persistido no navegador). Interface mobile-first com alvos de toque amplos para o porteiro.
 
-## Deploy sugerido
+## Deploy na Vercel
 
-- **App:** Vercel (conectar repositório Git)
-- **Banco:** Neon ou Supabase (copiar `DATABASE_URL` para variáveis da Vercel)
-- Rodar migrations no CI: `npx prisma migrate deploy`
+Guia completo: **[docs/DEPLOY-VERCEL.md](docs/DEPLOY-VERCEL.md)**
+
+Resumo:
+
+1. Importe o repo `magnosansil/btech-key-control` em [vercel.com/new](https://vercel.com/new)
+2. Configure no painel da Vercel:
+   - `DATABASE_URL` (Neon pooled)
+   - `DIRECT_URL` (Neon direct, para migrations)
+   - `LATE_TOLERANCE_MINUTES=15`
+   - `NEXT_PUBLIC_APP_NAME=Chave Fácil`
+3. Deploy → depois rode `npm run db:seed` uma vez (com `.env` apontando para o Neon)

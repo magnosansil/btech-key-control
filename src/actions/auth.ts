@@ -5,7 +5,12 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { clearSession, roleHomePath, setSession } from "@/lib/session";
 
-export async function loginAction(formData: FormData) {
+export type AuthFormState = { error: string } | null;
+
+export async function loginAction(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
   const identifier = String(formData.get("identifier") ?? "").trim();
   const role = formData.get("role") as UserRole;
 
@@ -28,7 +33,10 @@ export async function loginAction(formData: FormData) {
   redirect(roleHomePath(user.role));
 }
 
-export async function registerAction(formData: FormData) {
+export async function registerAction(
+  _prev: AuthFormState,
+  formData: FormData,
+): Promise<AuthFormState> {
   const name = String(formData.get("name") ?? "").trim();
   const identifier = String(formData.get("identifier") ?? "").trim();
   const role = formData.get("role") as UserRole;

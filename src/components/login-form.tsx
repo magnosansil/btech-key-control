@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { UserRole } from "@prisma/client";
 import { loginAction, registerAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,15 @@ export function LoginForm() {
   const [role, setRole] = useState<UserRole>("ALUNO");
   const [registerRole, setRegisterRole] = useState<UserRole>("ALUNO");
 
+  const [loginState, loginFormAction, loginPending] = useActionState(
+    loginAction,
+    null,
+  );
+  const [registerState, registerFormAction, registerPending] = useActionState(
+    registerAction,
+    null,
+  );
+
   return (
     <Tabs defaultValue="login" className="w-full">
       <TabsList className="grid h-12 w-full grid-cols-2">
@@ -35,14 +44,20 @@ export function LoginForm() {
 
       <TabsContent value="login" className="mt-6 space-y-4">
         <RoleFields role={role} setRole={setRole} />
-        <form action={loginAction} className="space-y-4">
+        <form action={loginFormAction} className="space-y-4">
           <input type="hidden" name="role" value={role} />
           <IdentifierField role={role} />
+          {loginState?.error && (
+            <p className="text-sm text-destructive" role="alert">
+              {loginState.error}
+            </p>
+          )}
           <Button
             type="submit"
+            disabled={loginPending}
             className="min-h-12 w-full text-base bg-emerald-700 hover:bg-emerald-800"
           >
-            Entrar
+            {loginPending ? "Entrando…" : "Entrar"}
           </Button>
         </form>
       </TabsContent>
@@ -53,19 +68,24 @@ export function LoginForm() {
           setRole={setRegisterRole}
           excludePorteiro
         />
-        <form action={registerAction} className="space-y-4">
+        <form action={registerFormAction} className="space-y-4">
           <input type="hidden" name="role" value={registerRole} />
           <div className="space-y-2">
             <Label htmlFor="name">Nome completo</Label>
             <Input id="name" name="name" required className="min-h-12 text-base" />
           </div>
           <IdentifierField role={registerRole} />
+          {registerState?.error && (
+            <p className="text-sm text-destructive" role="alert">
+              {registerState.error}
+            </p>
+          )}
           <Button
             type="submit"
-            disabled={registerRole === "PORTEIRO"}
+            disabled={registerPending || registerRole === "PORTEIRO"}
             className="min-h-12 w-full text-base bg-emerald-700 hover:bg-emerald-800"
           >
-            Criar conta
+            {registerPending ? "Cadastrando…" : "Criar conta"}
           </Button>
         </form>
       </TabsContent>

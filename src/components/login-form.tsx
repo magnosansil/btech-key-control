@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { FormEvent, useState, useTransition } from "react";
 import { UserRole } from "@prisma/client";
 import { loginAction, registerAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -21,15 +21,32 @@ const ROLES: UserRole[] = ["ALUNO", "PROFESSOR", "COORDENADOR", "PORTEIRO"];
 export function LoginForm() {
   const [role, setRole] = useState<UserRole>("ALUNO");
   const [registerRole, setRegisterRole] = useState<UserRole>("ALUNO");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+  const [loginPending, startLogin] = useTransition();
+  const [registerPending, startRegister] = useTransition();
 
-  const [loginState, loginFormAction, loginPending] = useActionState(
-    loginAction,
-    null,
-  );
-  const [registerState, registerFormAction, registerPending] = useActionState(
-    registerAction,
-    null,
-  );
+  function handleLogin(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    formData.set("role", role);
+    setLoginError(null);
+    startLogin(async () => {
+      const result = await loginAction(null, formData);
+      if (result?.error) setLoginError(result.error);
+    });
+  }
+
+  function handleRegister(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    formData.set("role", registerRole);
+    setRegisterError(null);
+    startRegister(async () => {
+      const result = await registerAction(null, formData);
+      if (result?.error) setRegisterError(result.error);
+    });
+  }
 
   return (
     <Tabs defaultValue="login" className="w-full">
@@ -44,12 +61,11 @@ export function LoginForm() {
 
       <TabsContent value="login" className="mt-6 space-y-4">
         <RoleFields role={role} setRole={setRole} />
-        <form action={loginFormAction} className="space-y-4">
-          <input type="hidden" name="role" value={role} />
+        <form onSubmit={handleLogin} className="space-y-4">
           <IdentifierField role={role} />
-          {loginState?.error && (
+          {loginError && (
             <p className="text-sm text-destructive" role="alert">
-              {loginState.error}
+              {loginError}
             </p>
           )}
           <Button
@@ -68,16 +84,15 @@ export function LoginForm() {
           setRole={setRegisterRole}
           excludePorteiro
         />
-        <form action={registerFormAction} className="space-y-4">
-          <input type="hidden" name="role" value={registerRole} />
+        <form onSubmit={handleRegister} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome completo</Label>
             <Input id="name" name="name" required className="min-h-12 text-base" />
           </div>
           <IdentifierField role={registerRole} />
-          {registerState?.error && (
+          {registerError && (
             <p className="text-sm text-destructive" role="alert">
-              {registerState.error}
+              {registerError}
             </p>
           )}
           <Button

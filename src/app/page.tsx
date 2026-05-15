@@ -1,103 +1,116 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, BarChart3, KeyRound, LayoutGrid } from "lucide-react";
+import { AppHeader } from "@/components/app-header";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { getSession } from "@/lib/session";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const session = await getSession();
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="flex min-h-dvh flex-col bg-gradient-to-b from-emerald-50/80 to-background">
+      <AppHeader user={session} />
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-8">
+        <section className="space-y-3 text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-emerald-950 sm:text-4xl">
+            Controle de chaves, simples e na palma da mão
+          </h1>
+        </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FeatureCard
+            href="/painel"
+            icon={<LayoutGrid className="size-6" />}
+            title="Painel público"
+            description="Veja quais salas estão livres ou ocupadas e quem está com a chave."
+          />
+          <FeatureCard
+            href="/reservar"
+            icon={<KeyRound className="size-6" />}
+            title="Reservar chave"
+            description="Agende data e horário antes de ir à guarita."
+          />
+          <FeatureCard
+            href="/login"
+            icon={<KeyRound className="size-6" />}
+            title="Área do porteiro"
+            description="Entregar e receber chaves com busca rápida."
+          />
+          <FeatureCard
+            href="/login"
+            icon={<BarChart3 className="size-6" />}
+            title="Dashboard coordenação"
+            description="Demanda por sala, horários e histórico."
+          />
         </div>
+
+        {!session ? (
+          <Link
+            href="/login"
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "mx-auto flex min-h-14 w-full max-w-sm items-center justify-center text-lg bg-emerald-700 text-white hover:bg-emerald-800",
+            )}
+          >
+            Entrar no sistema
+            <ArrowRight className="ml-2 size-5" />
+          </Link>
+        ) : (
+          <p className="text-center text-muted-foreground">
+            Olá, <strong>{session.name}</strong>. Use o menu acima para navegar.
+          </p>
+        )}
+
+        <Card className="border-dashed bg-muted/30">
+          <CardHeader>
+            <CardTitle className="text-base">Demonstração (MVP)</CardTitle>
+            <CardDescription>
+              Porteiro: CPF 12345678901 · Professor: SIAPE 1234567 · Aluno:
+              matrícula 2024001234 · Coordenador: SIAPE 7654321
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            Prazo de tolerância para retirada após o horário da reserva: 15
+            minutos (configurável).
+          </CardContent>
+        </Card>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
+  );
+}
+
+function FeatureCard({
+  href,
+  icon,
+  title,
+  description,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <Link href={href} className="group block">
+      <Card className="h-full transition-shadow group-hover:shadow-md">
+        <CardHeader>
+          <span className="mb-2 flex size-11 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800">
+            {icon}
+          </span>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+      </Card>
+    </Link>
   );
 }

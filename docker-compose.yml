@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: keytrack
+      POSTGRES_PASSWORD: keytrack
+      POSTGRES_DB: keytrack
+    volumes:
+      - postgres_data:/data
+
+volumes:
+  postgres_data:

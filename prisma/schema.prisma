@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ALUNO
+  PROFESSOR
+  COORDENADOR
+  PORTEIRO
+}
+
+enum RoomType {
+  SALA_AULA
+  LABORATORIO
+  SALA_REUNIAO
+}
+
+enum RoomStatus {
+  LIVRE
+  OCUPADA
+}
+
+enum ReservationStatus {
+  CONFIRMADA
+  ATIVA
+  EXPIRADA
+  CONCLUIDA
+  CANCELADA
+}
+
+model User {
+  id         String   @id @default(cuid())
+  name       String
+  role       UserRole
+  identifier String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  reservations     Reservation[]
+  keyLogs          KeyLog[]
+  roomsHeld        Room[]        @relation("CurrentHolder")
+}
+
+model Room {
+  id        String     @id @default(cuid())
+  number    String     @unique
+  name      String
+  type      RoomType
+  building  String     @default("Bloco A")
+  status    RoomStatus @default(LIVRE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  reservations Reservation[]
+  keyLogs      KeyLog[]
+
+  currentHolderId String?
+  currentHolder   User?   @relation("CurrentHolder", fields: [currentHolderId], references: [id])
+
+  @@index([status])
+  @@index([type])
+}
+
+model Reservation {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id])
+  roomId    String
+  room      Room              @relation(fields: [roomId], references: [id])
+  date      DateTime          @db.Date
+  startTime String
+  endTime   String
+  status    ReservationStatus @default(CONFIRMADA)
+  expiresAt DateTime?
+  pickedUpAt DateTime?
+  returnedAt DateTime?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([roomId, date, status])
+  @@index([status])
+  @@index([userId])
+}
+
+model KeyLog {
+  id           String   @id @default(cuid())
+  roomId       String
+  room         Room     @relation(fields: [roomId], references: [id])
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  action       String
+  reservationId String?
+  createdAt    DateTime @default(now())
+
+  @@index([roomId, createdAt])
+  @@index([createdAt])
+}
